@@ -19,3 +19,6 @@ CREATE TABLE users (
   FOREIGN KEY (country_id) REFERENCES countries(id),
   CONSTRAINT chk_users_role CHECK (role IN ('USER','ADMIN'))
 );
+
+CREATE INDEX idx_users_status ON users(status);
+CREATE INDEX idx_users_created_at ON users(created_at);
