@@ -33,3 +33,4 @@ CREATE INDEX idx_listings_created_at ON listings(created_at);
 CREATE INDEX idx_listings_price ON listings(price);
 CREATE INDEX idx_listings_type ON listings(type);
 CREATE INDEX idx_listings_status ON listings(status);
+CREATE INDEX idx_listings_user_id ON listings(user_id);
