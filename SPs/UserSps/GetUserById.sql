@@ -32,9 +32,9 @@ BEGIN
   END IF;
 
   -- 3) Devolver el usuario
- SELECT *
+  SELECT *
     FROM users
-  WHERE u.id = p_UserId;
+   WHERE id = p_UserId;
 END//
 
 DELIMITER ;
