@@ -9,5 +9,7 @@ CREATE TABLE email_confirmation_tokens (
   CONSTRAINT fk_email_token_user
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   
-  INDEX idx_email_token (token)
-);
+    INDEX idx_email_token (token)
+  ,INDEX idx_email_tokens_user_id (user_id)
+  );
+

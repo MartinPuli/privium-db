@@ -22,3 +22,4 @@ CREATE TABLE users (
 
 CREATE INDEX idx_users_status ON users(status);
 CREATE INDEX idx_users_created_at ON users(created_at);
+CREATE INDEX idx_users_country_id ON users(country_id);

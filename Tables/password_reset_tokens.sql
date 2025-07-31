@@ -9,5 +9,7 @@ CREATE TABLE password_reset_tokens (
   CONSTRAINT fk_reset_token_user
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 
-  INDEX idx_reset_token (token)
-);
+    INDEX idx_reset_token (token)
+  ,INDEX idx_reset_token_user_id (user_id)
+  );
+
