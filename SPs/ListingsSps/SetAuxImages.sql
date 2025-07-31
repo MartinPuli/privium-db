@@ -14,6 +14,8 @@ CREATE PROCEDURE SetAuxImages(
 BEGIN
   DECLARE v_count INT;
   DECLARE v_json  JSON;
+  DECLARE v_imgs  TEXT;
+  DECLARE v_item  VARCHAR(2048);
 
   -- Validar existencia de la publicación
   IF NOT EXISTS (SELECT 1 FROM listings WHERE id = p_ListingId) THEN
@@ -30,11 +32,18 @@ BEGIN
        AND image_number BETWEEN 1 AND 4;
 
   ELSE
-    -- Convertir CSV a JSON array: 'url1,url2' → ["url1","url2"]
-    SET v_json = CAST(
-      CONCAT('["', REPLACE(TRIM(p_Images), ',', '","'), '"]')
-      AS JSON
-    );
+    -- Convertir CSV a JSON array
+    SET v_imgs = TRIM(p_Images);
+    SET v_json = JSON_ARRAY();
+    WHILE v_imgs <> '' DO
+      SET v_item = SUBSTRING_INDEX(v_imgs, ',', 1);
+      SET v_json = JSON_ARRAY_APPEND(v_json, '$', TRIM(v_item));
+      IF INSTR(v_imgs, ',') = 0 THEN
+        SET v_imgs = '';
+      ELSE
+        SET v_imgs = SUBSTRING(v_imgs, INSTR(v_imgs, ',') + 1);
+      END IF;
+    END WHILE;
 
     -- Validar máximo 4 imágenes
     SET v_count = JSON_LENGTH(v_json);

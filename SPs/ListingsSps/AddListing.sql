@@ -29,6 +29,8 @@ BEGIN
   DECLARE v_count   INT;
   DECLARE v_NewId   BIGINT;
   DECLARE v_json    JSON;
+  DECLARE v_cats    TEXT;
+  DECLARE v_item    VARCHAR(255);
 
   -- Validar usuario existe y activo
   SELECT COUNT(*) INTO v_count
@@ -76,13 +78,18 @@ BEGIN
 
   -- Procesar categorías si se proporcionan
   IF p_CategoryIds IS NOT NULL AND TRIM(p_CategoryIds) <> '' THEN
-    -- Convertir CSV a JSON array: ["2","5","8"]
-    SET v_json = JSON_ARRAY_APPEND(
-      JSON_ARRAY(),
-      '$',
-      JSON_QUOTE(REPLACE(TRIM(p_CategoryIds), ',', '","'))
-    );
-    -- Ejemplo produce: '["2","5","8"]'
+    -- Convertir CSV a JSON array
+    SET v_cats = TRIM(p_CategoryIds);
+    SET v_json = JSON_ARRAY();
+    WHILE v_cats <> '' DO
+      SET v_item = SUBSTRING_INDEX(v_cats, ',', 1);
+      SET v_json = JSON_ARRAY_APPEND(v_json, '$', TRIM(v_item));
+      IF INSTR(v_cats, ',') = 0 THEN
+        SET v_cats = '';
+      ELSE
+        SET v_cats = SUBSTRING(v_cats, INSTR(v_cats, ',') + 1);
+      END IF;
+    END WHILE;
 
     -- 1) Verificar duplicados
     SELECT COUNT(*) INTO v_count FROM (
