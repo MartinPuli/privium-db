@@ -27,7 +27,7 @@ BEGIN
   SELECT
     id,
     user_id             AS userId,
-    proof_message       AS proofImage,
+    proof_message       AS proofMessage,
     proof_image_b64     AS proofImageB64,
     created_at          AS createdAt
   FROM residence_proofs
