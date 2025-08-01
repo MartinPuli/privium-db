@@ -20,18 +20,7 @@ BEGIN
       SET MESSAGE_TEXT = 'Usuario no encontrado';
   END IF;
 
-  -- 2) Verificar email y residencia estén aprobados
-  IF EXISTS (
-    SELECT 1 FROM users
-     WHERE id = p_UserId
-       AND (IFNULL(verified_email,0) = 0
-         OR IFNULL(verified_residence,0) = 0)
-  ) THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Email o residencia no verificados';
-  END IF;
-
-  -- 3) Devolver el usuario
+  -- 2) Devolver el usuario
   SELECT *
     FROM users
    WHERE id = p_UserId;
