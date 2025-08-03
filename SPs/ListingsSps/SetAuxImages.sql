@@ -32,16 +32,16 @@ BEGIN
        AND image_number BETWEEN 1 AND 4;
 
   ELSE
-    -- Convertir CSV a JSON array
+    -- Convertir lista separada por CHAR(31) a JSON array
     SET v_imgs = TRIM(p_Images);
     SET v_json = JSON_ARRAY();
     WHILE v_imgs <> '' DO
-      SET v_item = SUBSTRING_INDEX(v_imgs, ',', 1);
+      SET v_item = SUBSTRING_INDEX(v_imgs, CHAR(31), 1);
       SET v_json = JSON_ARRAY_APPEND(v_json, '$', TRIM(v_item));
-      IF INSTR(v_imgs, ',') = 0 THEN
+      IF INSTR(v_imgs, CHAR(31)) = 0 THEN
         SET v_imgs = '';
       ELSE
-        SET v_imgs = SUBSTRING(v_imgs, INSTR(v_imgs, ',') + 1);
+        SET v_imgs = SUBSTRING(v_imgs, INSTR(v_imgs, CHAR(31)) + 1);
       END IF;
     END WHILE;
 
