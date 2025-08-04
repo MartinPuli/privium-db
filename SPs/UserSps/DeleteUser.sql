@@ -2,9 +2,10 @@ DELIMITER //
 
 /*---------------------------------------------------------------
   SP: DeleteUser
-  Propósito: "Eliminar" un usuario (borrado lógico).
-    - Verifica que el usuario exista y no esté ya eliminado (status ≠ -1).
-    - Cambia status a -1.
+  Propósito: Elimina un usuario y sus publicaciones de forma permanente.
+    - Verifica que el usuario exista.
+    - Elimina el registro del usuario (borrado físico).
+    - Las publicaciones e imágenes asociadas se eliminan por cascada.
 ----------------------------------------------------------------*/
 DROP PROCEDURE IF EXISTS DeleteUser//
 
@@ -12,21 +13,20 @@ CREATE PROCEDURE DeleteUser(
   IN p_UserId BIGINT
 )
 BEGIN
-  -- Verificar que el usuario exista y no esté eliminado (status ≠ -1)
+  -- Verificar que el usuario exista
   IF NOT EXISTS (
-    SELECT 1 FROM users WHERE id = p_UserId AND status <> -1
+    SELECT 1 FROM users WHERE id = p_UserId
   ) THEN
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Usuario no encontrado';
   END IF;
 
   START TRANSACTION;
 
-  -- Marcar como eliminado lógicamente
-  UPDATE users
-    SET status = -1
-  WHERE id = p_UserId;
+  -- Eliminar usuario de forma permanente
+  DELETE FROM users
+   WHERE id = p_UserId;
 
-  -- Si no se actualizó ninguna fila, hay un error
+  -- Si no se eliminó ninguna fila, hay un error
   IF ROW_COUNT() = 0 THEN
     ROLLBACK;
     SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error al eliminar usuario';
@@ -37,7 +37,8 @@ BEGIN
   -- Devolver resultado
   SELECT
     0 AS code,
-    'Usuario eliminado' AS description;
+    'Usuario y publicaciones eliminados' AS description;
 END//
 
 DELIMITER ;
+
