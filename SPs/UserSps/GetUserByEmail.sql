@@ -5,7 +5,7 @@ DELIMITER //
   Propósito: 
     - Buscar un usuario por email, siempre que no esté eliminado (status ≠ -1).
     - El email debe estar verificado.
-    - La residencia debe estar aprobada.
+    - La residencia debe estar aprobada; en caso contrario se indica si está pendiente o rechazada.
     - Devuelve todos los campos de la tabla users.
 ----------------------------------------------------------------*/
 DROP PROCEDURE IF EXISTS GetUserByEmail//
@@ -43,8 +43,18 @@ BEGIN
      WHERE email = p_Email
        AND (verified_residence = 0 OR verified_residence IS NULL)
   ) THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Prueba de residencia pendiente o rechazada';
+    IF EXISTS (
+      SELECT 1
+        FROM residence_proofs rp
+        JOIN users u ON rp.user_id = u.id
+       WHERE u.email = p_Email
+    ) THEN
+      SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Prueba de residencia pendiente';
+    ELSE
+      SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Prueba de residencia rechazada';
+    END IF;
   END IF;
 
   -- 4) Devolver el usuario
