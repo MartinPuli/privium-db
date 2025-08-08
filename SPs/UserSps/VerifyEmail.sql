@@ -18,11 +18,11 @@ BEGIN
   DECLARE v_UserId          BIGINT;
   DECLARE v_AlreadyVerified TINYINT;
   DECLARE v_ProofMessage    VARCHAR(500);
-  DECLARE v_ProofImageUrl   VARCHAR(1000);
+  DECLARE v_ProofDocUrl     VARCHAR(1000);
 
   -- 1) Buscar el user_id y datos de prueba en email_confirmation_tokens
-  SELECT user_id, proof_message, proof_image_url
-    INTO v_UserId, v_ProofMessage, v_ProofImageUrl
+  SELECT user_id, proof_message, proof_doc_url
+    INTO v_UserId, v_ProofMessage, v_ProofDocUrl
     FROM email_confirmation_tokens
    WHERE token = p_Token
    LIMIT 1;
@@ -62,9 +62,9 @@ BEGIN
 
   -- 4) Crear registro de prueba de residencia
   INSERT INTO residence_proofs (
-    user_id, proof_message, proof_image_url, created_at
+    user_id, proof_message, proof_doc_url, created_at
   ) VALUES (
-    v_UserId, v_ProofMessage, v_ProofImageUrl, NOW()
+    v_UserId, v_ProofMessage, v_ProofDocUrl, NOW()
   );
 
   -- 5) Eliminar el token usado
