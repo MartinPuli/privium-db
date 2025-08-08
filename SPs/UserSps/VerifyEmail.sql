@@ -81,7 +81,8 @@ BEGIN
   -- 6) Respuesta exitosa
   SELECT
     0 AS code,
-    'Email verificado correctamente' AS description;
+    'Email verificado correctamente' AS description,
+    v_UserId AS user_id;
 END//
 
 DELIMITER ;
