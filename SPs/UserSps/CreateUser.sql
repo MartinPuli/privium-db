@@ -18,7 +18,7 @@ CREATE PROCEDURE CreateUser(
   IN p_CountryId     BIGINT,
   IN p_Phone         VARCHAR(20),
   IN p_ProofMessage  TEXT,
-  IN p_ProofImageB64 LONGTEXT
+  IN p_ProofImage LONGTEXT
 )
 BEGIN
   DECLARE v_NewUserId BIGINT;
@@ -52,11 +52,11 @@ BEGIN
     SET v_NewUserId = LAST_INSERT_ID();
 
     -- Si envían comprobante de residencia, lo insertamos
-    IF p_ProofMessage IS NOT NULL OR p_ProofImageB64 IS NOT NULL THEN
+    IF p_ProofMessage IS NOT NULL OR p_ProofImage IS NOT NULL THEN
       INSERT INTO residence_proofs (
-        user_id, proof_message, proof_image_b64, created_at
+        user_id, proof_message, proof_image, created_at
       ) VALUES (
-        v_NewUserId, p_ProofMessage, p_ProofImageB64, NOW()
+        v_NewUserId, p_ProofMessage, p_ProofImage, NOW()
       );
     END IF;
   COMMIT;
@@ -74,7 +74,7 @@ BEGIN
     0                     AS verified_residence,
     0                     AS status,
     p_CountryId           AS country_id,
-    p_ProofImageB64       AS profile_picture,
+    p_ProofImage          AS profile_picture,
     NOW()                 AS created_at,
     'USER'                AS role;
     
