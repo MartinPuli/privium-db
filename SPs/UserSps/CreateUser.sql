@@ -4,7 +4,6 @@ DELIMITER //
   SP: CreateUser
   Propósito:
     - Crear un nuevo usuario.
-    - Insertar opcionalmente su comprobante de residencia.
     - Devolver el registro del usuario.
 ----------------------------------------------------------------*/
 DROP PROCEDURE IF EXISTS CreateUser//
@@ -16,9 +15,7 @@ CREATE PROCEDURE CreateUser(
   IN p_PasswordHash  VARCHAR(255),
   IN p_Dni           VARCHAR(20),
   IN p_CountryId     BIGINT,
-  IN p_Phone         VARCHAR(20),
-  IN p_ProofMessage  TEXT,
-  IN p_ProofImage LONGTEXT
+  IN p_Phone         VARCHAR(20)
 )
 BEGIN
   DECLARE v_NewUserId BIGINT;
@@ -50,15 +47,6 @@ BEGIN
       0,      NOW()
     );
     SET v_NewUserId = LAST_INSERT_ID();
-
-    -- Si envían comprobante de residencia, lo insertamos
-    IF p_ProofMessage IS NOT NULL OR p_ProofImage IS NOT NULL THEN
-      INSERT INTO residence_proofs (
-        user_id, proof_message, proof_image, created_at
-      ) VALUES (
-        v_NewUserId, p_ProofMessage, p_ProofImage, NOW()
-      );
-    END IF;
   COMMIT;
 
   -- Devolver el usuario creado
@@ -74,7 +62,7 @@ BEGIN
     0                     AS verified_residence,
     0                     AS status,
     p_CountryId           AS country_id,
-    p_ProofImage          AS profile_picture,
+    NULL                  AS profile_picture,
     NOW()                 AS created_at,
     'USER'                AS role;
     
