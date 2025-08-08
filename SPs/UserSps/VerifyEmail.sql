@@ -3,11 +3,11 @@ DELIMITER //
 /*---------------------------------------------------------------
   SP: VerifyEmail
   Propósito: Validar token de verificación desde email_confirmation_tokens,
-    marcar email verificado en users y anular el token.
+    marcar email verificado en users y crear prueba de residencia.
     - Verifica que el token exista en email_confirmation_tokens.
     - Si el email ya estaba verificado, arroja error específico.
     - Marca verified_email = 1, actualiza status = 1 si verified_residence = 1.
-    - Elimina el token de email_confirmation_tokens.
+    - Inserta la prueba de residencia y elimina el token.
 ----------------------------------------------------------------*/
 DROP PROCEDURE IF EXISTS VerifyEmail//
 
@@ -17,10 +17,12 @@ CREATE PROCEDURE VerifyEmail(
 BEGIN
   DECLARE v_UserId          BIGINT;
   DECLARE v_AlreadyVerified TINYINT;
+  DECLARE v_ProofMessage    VARCHAR(500);
+  DECLARE v_ProofDocUrl     VARCHAR(1000);
 
-  -- 1) Buscar el user_id en email_confirmation_tokens
-  SELECT user_id
-    INTO v_UserId
+  -- 1) Buscar el user_id y datos de prueba en email_confirmation_tokens
+  SELECT user_id, proof_message, proof_doc_url
+    INTO v_UserId, v_ProofMessage, v_ProofDocUrl
     FROM email_confirmation_tokens
    WHERE token = p_Token
    LIMIT 1;
@@ -58,7 +60,14 @@ BEGIN
       SET MESSAGE_TEXT = 'Error al actualizar estado de verificación de email';
   END IF;
 
-  -- 4) Eliminar el token usado
+  -- 4) Crear registro de prueba de residencia
+  INSERT INTO residence_proofs (
+    user_id, proof_message, proof_doc_url, created_at
+  ) VALUES (
+    v_UserId, v_ProofMessage, v_ProofDocUrl, NOW()
+  );
+
+  -- 5) Eliminar el token usado
   DELETE FROM email_confirmation_tokens
    WHERE token = p_Token;
   IF ROW_COUNT() = 0 THEN
@@ -69,7 +78,7 @@ BEGIN
 
   COMMIT;
 
-  -- 5) Respuesta exitosa
+  -- 6) Respuesta exitosa
   SELECT
     0 AS code,
     'Email verificado correctamente' AS description;

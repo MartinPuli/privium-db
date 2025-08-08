@@ -4,7 +4,7 @@ CREATE TABLE residence_proofs (
   id               BIGINT AUTO_INCREMENT PRIMARY KEY,
   user_id          BIGINT            NOT NULL,
   proof_message    VARCHAR(500),
-  proof_image_b64  LONGTEXT,
+  proof_doc_url    VARCHAR(1000),
   created_at       DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   CONSTRAINT fk_residence_proofs_user
@@ -14,5 +14,5 @@ CREATE TABLE residence_proofs (
   CONSTRAINT uq_residence_proofs_user UNIQUE (user_id),
 
   CONSTRAINT chk_proof_not_both_null
-    CHECK (proof_message IS NOT NULL OR proof_image_b64 IS NOT NULL)
+    CHECK (proof_message IS NOT NULL OR proof_doc_url IS NOT NULL)
 );

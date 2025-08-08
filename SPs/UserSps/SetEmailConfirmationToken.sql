@@ -4,12 +4,16 @@ DELIMITER //
   SP: SetEmailConfirmationToken
   Propósito: Insertar o reemplazar el token de confirmación
              en email_confirmation_tokens dado un user_id.
+             Guarda también datos de prueba de residencia
+             (mensaje y URL del documento).
 ----------------------------------------------------------------*/
 DROP PROCEDURE IF EXISTS SetEmailConfirmationToken//
 
 CREATE PROCEDURE SetEmailConfirmationToken(
-  IN p_UserId BIGINT,
-  IN p_Token  VARCHAR(100)
+  IN p_UserId        BIGINT,
+  IN p_Token         VARCHAR(100),
+  IN p_ProofMessage  VARCHAR(500),
+  IN p_ProofDocUrl   VARCHAR(1000)
 )
 BEGIN
   -- Manejador de errores: rollback y señal en caso de excepción
@@ -30,17 +34,23 @@ BEGIN
       SET MESSAGE_TEXT = 'Usuario inexistente';
   END IF;
 
+  -- 2) Validar que al menos haya mensaje o documento
+  IF p_ProofMessage IS NULL AND p_ProofDocUrl IS NULL THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'Se requiere mensaje o documento para la prueba de residencia';
+  END IF;
+
   START TRANSACTION;
 
-    -- 2) Eliminar token previo si existe
+    -- 3) Eliminar token previo si existe
     DELETE FROM email_confirmation_tokens
      WHERE user_id = p_UserId;
 
-    -- 3) Insertar nuevo token
+    -- 4) Insertar nuevo token con datos de prueba
     INSERT INTO email_confirmation_tokens (
-      user_id, token, created_at
+      user_id, token, proof_message, proof_doc_url, created_at
     ) VALUES (
-      p_UserId, p_Token, NOW()
+      p_UserId, p_Token, p_ProofMessage, p_ProofDocUrl, NOW()
     );
 
   COMMIT;
