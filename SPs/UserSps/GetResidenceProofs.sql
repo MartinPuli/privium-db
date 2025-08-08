@@ -28,7 +28,7 @@ BEGIN
     id,
     user_id             AS userId,
     proof_message       AS proofMessage,
-    proof_image_b64     AS proofImageB64,
+    proof_image_url     AS proofImageUrl,
     created_at          AS createdAt
   FROM residence_proofs
   WHERE (p_UserId IS NULL OR user_id = p_UserId)
